@@ -15,6 +15,7 @@ Everything an AI coding assistant (or a person briefing one) needs to continue m
 | `HEECHEE_MOD_STANDARDS.md` | The rules every mod follows: layout, data changes, layouts, validation, Nexus text, Workshop, working rules, agent directives, splitting, delivery | humans and agents |
 | `AGENT_DIRECTIVES.md` | Maps each AI tool to the file it reads, and how to refresh the adapters | maintainers |
 | `check-agent-directives.ps1` | Script that checks the adapter files match `AGENTS.md` (`-Fix` regenerates them) | CI or a human |
+| `../UPDATING.md`, `../CHANGELOG.md`, `../tools/` | how to update this knowledge base, what changed, and the snippet and verify scripts | anyone adding a mod or a finding |
 
 **Limits to know:** the tool-to-file mapping comes from third-party guides and has not been verified inside each tool; Cline, Continue and Roo are not covered. The `.aiassistant` copy is generated, never edited by hand.
 
@@ -27,6 +28,7 @@ These apply to every coding or mod task. They are repeated here so a new assista
 3. **Say plainly what cannot be done** in the current environment: Unity Editor APIs, Git commits, the Pampel Games AI engine, Skybox AI generation. (This knowledge base was written in an environment with no game and no .NET SDK; every claim says how it was verified.)
 4. **Edits to existing code or files get a plan first and wait for confirmation; an explicit "create X" request counts as confirmation.**
 5. **For changes to already released mods** (their files are in the author's local git) deliver **only the changed files plus patches**, never the whole project; full zips only for new projects and mods.
+6. **Keep the knowledge base up to date.** Every new mod, new game fact or fixed bug also updates `Ormod_Modding_Knowledge_Base` (Notes entry, Internals row, tutorial section with snippets made by `tools/snippet.py`, changelog line) in the same change set, following `UPDATING.md` (standards section 14). Labels stay honest.
 
 ## 3. How the work was actually done (a repeatable procedure)
 
@@ -59,7 +61,10 @@ These apply to every coding or mod task. They are repeated here so a new assista
 ### 4.3 "Which game files do you need?"
 Use the table in `Ormod_Game_Internals_Notes.md`, section 7.
 
-### 4.4 Delivering a change (what the assistant should send)
+### 4.4 Updating the knowledge base after a mod or a fix
+Paste the prompt block from `UPDATING.md` section 5 into the request. It makes the assistant add Notes entries, Internals rows, a tutorial section with verbatim snippets and a changelog line, and run the snippet check.
+
+### 4.5 Delivering a change (what the assistant should send)
 The changed files, one patch (with a separate tests patch if tests changed), the commands to apply and verify it (`git apply --check`, build, tests), a list of what is [TESTED] and what the game must confirm.
 
 ## 5. Habits that avoided or caused problems

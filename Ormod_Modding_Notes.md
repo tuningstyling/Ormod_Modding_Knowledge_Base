@@ -4,6 +4,14 @@ Hard-won findings from building twelve BepInEx 6 mods for **ORMOD: Directive Pla
 
 **Status labels:** **[IN-GAME]** the author reported it working or failing in the game. **[TESTED]** verified against the game's source files and in a test harness; not yet reported from the game. **[FAILED]** tried and did not work. **[ASSUMED]** reasoned, not verified.
 
+**Why this exists.** A mod author who is new to a game spends most of the time not on the code but on finding out *which* number, field or method matters, who reads it, and why the first attempt does not work. These notes keep that knowledge so it is paid for once.
+
+**Generalization rule** (borrowed from the Windrose notes). A class or field name in an example is a worked example of a *technique*, not a project-specific detail. "Make the crafting time 0.001" teaches "find who divides by the time and give it a safe tiny number" and applies to any timer in any Unity game.
+
+**How to search.** These files are plain markdown; search for a heading's exact wording (for example `A3.` or `D9.`) to jump to it. Findings keep their numbers when new ones are added, so references stay valid.
+
+**Four milestones, kept separate.** A mod can (1) *load* (a log line from `Awake`), (2) *patch* (Harmony installs and the patched method runs), (3) *behave* (the game does the new thing), (4) *feel right* (no side effects, correct in multiplayer, nice UI). Progress through them is not a smooth slope; each has its own diagnostic and its own test. Many entries below say which milestone failed.
+
 **Honesty note.** The environment these mods were written in has no game, no Unity editor and no .NET SDK. Almost everything marked [TESTED] was verified with source files, stand-in classes and a compile-and-run harness. Only the author's own testing in the game can promote an item to [IN-GAME]. Where the author reported a problem, the fix and its cause are written down here.
 
 ## Contents
@@ -16,6 +24,7 @@ Hard-won findings from building twelve BepInEx 6 mods for **ORMOD: Directive Pla
 - **Part F. Dead ends and corrected beliefs**
 - **Part G. Releasing and delivering changes** (G1 to G8)
 - **Part H. Open questions**
+- **Part I. Process rules** (flat rules from real mistakes)
 
 ---
 
@@ -230,3 +239,36 @@ The working directory of the build environment can be wiped between turns. Only 
 4. **Does a dedicated server apply the production rates through the same settings object?** The code suggests so.
 5. **Coal and branches as harvestables** are not named in the supplied code; they are covered only if the game implements them as ore or bush.
 6. **Unpack hold time** is prefab data (`_interactTime`); making unpacking instant needs a `WorkbenchUnpack` check after the interact start.
+
+---
+
+# Part I. Process rules
+
+Flat rules, each from a mistake that cost real time in this project (the style is borrowed from the Windrose SDK notes' "cook once, edit once").
+
+### I1. Snapshot a baseline before every edit
+Copy the project before changing it, then diff against the copy. A patch made against a baseline you only remember fails on the user's machine. The edited working copy becomes the next baseline.
+
+### I2. Never rebuild a released project from older sources
+Clothing Size X: rebuilding from the 1.0.0 sources would have changed stored layouts and stranded players' items. When the author's current source is not in the conversation, ask for it.
+
+### I3. Verify by script, then verify again after the last edit
+Every delivery ends with: validator, compile check, logic tests, checksum regeneration, zip, **extract the zip and check its checksums**, patch applied to the previous tree and compared with the new tree. The last two steps caught a stale image and would catch a stale file. Re-run the whole list after *any* late edit, even a documentation edit (checksums change).
+
+### I4. Run new tests against the old code
+A test that has never failed has proven nothing. After a bug fix, run the new test against the unfixed sources and see the exact reported failure.
+
+### I5. One change, one explanation, one number
+Bump the version once per change set; say in one sentence what changed; keep a status entry per version. A multi-purpose release is hard to bisect when a player reports a problem.
+
+### I6. A theory is not a fix until the next screenshot or log says so
+The window-height story: an explanation from one screenshot was shipped as a fix, failed, and was replaced by a measured solution. Label the delivery "untested in the game" and ask for the next screenshot.
+
+### I7. Do not touch what was not asked
+Extra toggles, saved settings and refactors are flagged in the README as additions or left out. Unrelated dead code is mentioned, not deleted.
+
+### I8. Ask for the missing file
+Every wrong guess in Part F had a missing source file behind it. The cheapest step in the whole process is asking for the file.
+
+### I9. After a confirmed finding, write it down
+New knowledge goes into this repository in the same change set as the code: a Notes entry (with a diagnostic signature), an Internals row, a Tutorial snippet if the code teaches something new, and a changelog line. See `UPDATING.md`.

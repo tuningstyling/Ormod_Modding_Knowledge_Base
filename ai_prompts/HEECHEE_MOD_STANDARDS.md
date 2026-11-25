@@ -175,3 +175,10 @@ Every project delivered so far is already released in the user's local git, so a
 - **Full zips** are only for new projects and mods (sections 1-11 apply to them in full).
 - **Exactness:** a baseline copy of the project is taken before editing so the diff is exact; the working copy then becomes the new baseline. If the user's local git differs from the last delivered version (offline edits), the changed files are the safe route and the user says what differs.
 - **Old zips** of a project that has since changed are stale; they are not re-issued.
+
+## 14. Knowledge base upkeep
+The Ormod knowledge base (`Ormod_Modding_Knowledge_Base`: tutorial, notes, game internals, AI agent knowledge, prompts) is part of the deliverable of every mod. A change set that adds a mod, a game fact or a fixed bug also updates it, in the same commit; `UPDATING.md` in that repository is the procedure.
+- **What to add:** new mod = tutorial section, README table row, Notes entries, Internals rows, changelog line. Fixed bug = Notes entry with its diagnostic signature (and a Dead-ends item if a first theory was wrong). New game source = Internals rows.
+- **Quote by tool:** code in the tutorial is created with `tools/snippet.py` and re-checked with `tools/verify_snippets.py`; never retyped.
+- **Honest labels:** [IN-GAME] only with evidence from the game (a log line or a screenshot), otherwise [TESTED], [ASSUMED] or [FAILED]. Nothing is promoted by a successful build alone.
+- **Delivery:** like any released project (section 13): changed files plus a patch, not a new zip.

@@ -1286,3 +1286,50 @@ public class Object
 - **Steam Workshop:** the game has no Workshop, so the repository prepares a `workshop/` folder per mod (manifest, Steam-markup description, packaging script) and a loader mod. A warning applies to Extra Music: the loader deletes the mod's folder when you unsubscribe, which would delete the player's music.
 - **Integrity:** a `CHECKSUMS.sha256` per project; the zip is extracted and verified with `sha256sum -c` before delivery.
 - **Changes after release:** only the changed files and a `git apply`-compatible patch are delivered, never the whole project. A patch is verified three ways: `patch --dry-run`, applying it to the previous tree and comparing the result with the new tree, and `git apply --check`.
+
+---
+
+## Chapter 11: worked examples (from request to result, including a failure)
+
+The earlier chapters explain code. This chapter shows the *method*: how a request became a patch, how a theory failed, and how to read a log. Specific class names are examples of techniques, not trivia.
+
+### 11.1 From a request to a patch: "play the menu tracks while the pause menu is open"
+
+1. **The request.** The user wanted tracks flagged "Menu" to play in-game while the pause and settings menus are open.
+2. **Find out what the game already does.** The game's `SoundController` has no menu logic. The title screen's own controller, `OfflineSceneController`, plays music from two private lists, so *menu music means the title screen* in the vanilla game. That is a finding in itself: the in-game pause menu has no music to extend.
+3. **Find the trigger.** Which code knows that the pause menu is open? The player's state machine: `PlayerStateMachine.Instance.CurrentState == State.Paused`. That class was **not** in the supplied files, so the assistant *asked for it* instead of guessing (Process rule I8). The enum showed `Paused = 10`, an *Overlay* state with a free cursor.
+4. **Find the output route.** Music volume sliders are mixer parameters (`TitleMusicVolume`, `IngameMusicVolume`) applied to *mixer groups*. To make the title-screen volume slider control the pause music, the mod's `AudioSource` must output to the group named `TitleMusic`, which the mod finds through the sound controller's private `_mixer` field.
+5. **Design the smallest thing.** One new per-track value (Game, Menu, Both), one new option (on by default), a small state machine in the player (fade in, fade out, never interrupt the user).
+6. **Write the checks first.** Pure rules (which tracks are eligible by time of day) and the state machine are run in a compiled harness with stand-ins: opening the menu starts a Menu track on the title group and mutes the game's music; by day only day or any-time tracks play; closing fades and restores; a user's own playback is never interrupted; with no eligible track nothing starts.
+7. **Deliver as a change set** (changed files plus patches, verified three ways) and say what only the game can confirm: *does the settings screen keep the `Paused` state?*
+
+**What to copy from this:** find the *trigger*, the *route to the output*, and the *smallest state machine*; write the test list before the code; list the unknowns in the test plan.
+
+### 11.2 A failure: making a list fill a window
+
+1. **The symptom** (a screenshot): the window was resized taller, but the track list stayed five rows high and there was empty space at the bottom.
+2. **First theory** (version 1.4.1): text lines also stretch vertically and steal the free height, so make them non-stretching and let the list expand. It sounded right and explained the odd gaps.
+3. **The next screenshot proved it wrong:** the headings now aligned (a separate fix that did work), but the list still did not grow.
+4. **Second approach** (version 1.4.2): stop relying on the layout engine. In every repaint, measure where the last control ends, subtract the list's own height to get the height of everything else, and give the list `window height - everything else - padding`.
+5. **Lesson:** a layout theory is not a fix until a screenshot says so (Process rule I6). When the engine's automatic behaviour does not do what the documentation suggests, measure and compute, and write the dead end in the Notes so nobody tries it again.
+
+### 11.3 Reading a log: three messages and what they meant
+
+| Log line | Meaning | Fix |
+|---|---|---|
+| `NullReferenceException` from `UnityEngine.AudioSource.Stop ()` | the C# variable points at a Unity object that was destroyed | check `== null` (Unity's overload), recreate, attach to an object that lives as long as the plugin |
+| `Audio compression is not valid as streamAudio is set to true` | set `compressed = true` while `streamAudio` was still on | set `streamAudio = false` first |
+| `Cannot create FMOD::Sound instance for clip "" (FMOD error: Unsupported file or audio format.)` | the file is Ogg Opus or FLAC, not Ogg Vorbis, or damaged | convert to Ogg Vorbis; check `loadState` and report the reason in the UI |
+| `OnAudioConfigurationChanged is being called recursively ...` | the **game's** own handler resets audio again and again because the device keeps changing | not the mod's bug; a mod can resume its own player after a real device change, deferred a frame or two |
+
+Always find the *first* error in the log and the lines before it; later errors are often consequences.
+
+### 11.4 The recipe for "make the waiting go away"
+
+1. **Find the wait on screen.** A progress bar or a hold-to-act prompt. Note the exact action.
+2. **Search the game code for who counts time:** `Time.deltaTime` subtractions, `Invoke(...)`, coroutines with `WaitForSeconds`, `DateTime`. Follow the number back to where it is *set* (the start site) and forward to where it is *compared* (the completion).
+3. **Find every reader of the same number**, including the progress display. Anything that *divides* by it needs a value above zero.
+4. **Decide where it lives:** data on a prefab or recipe (change the data, scaled from vanilla), a field on a manager (shrink it right after the start site with a Postfix), or a server rule (change the setting the server divides by).
+5. **Check who needs the mod** (your own client, or the host).
+6. **Choose the smallest patch** (Postfix after the start site, not a rewrite) and write the logic as a pure function you can test.
+7. **List what you deliberately did not change** (cooldowns, animations, skills, yields) in the README, so players are not surprised.

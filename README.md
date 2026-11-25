@@ -8,10 +8,11 @@ Notes, a tutorial and an AI-agent guide for making **BepInEx 6 / Unity** mods fo
 
 | File | What it is | Read it when |
 |---|---|---|
-| [`Ormod_Mod_Tutorial.md`](Ormod_Mod_Tutorial.md) | Ten chapters. Each code snippet (copied verbatim from a real mod) is followed by *what it is, purpose, how it works, effect in the game, background concepts* | you are new to Unity or to this game |
+| [`Ormod_Mod_Tutorial.md`](Ormod_Mod_Tutorial.md) | Eleven chapters (the last one is worked examples). Each code snippet (copied verbatim from a real mod) is followed by *what it is, purpose, how it works, effect in the game, background concepts* | you are new to Unity or to this game |
 | [`Ormod_Modding_Notes.md`](Ormod_Modding_Notes.md) | Numbered findings in parts A to H: setup, Harmony patterns, game systems, audio and IMGUI, testing, dead ends, releasing, open questions | you hit a problem or start a new mod |
 | [`Ormod_Game_Internals_Notes.md`](Ormod_Game_Internals_Notes.md) | A reference of the game's classes, fields and facts the mods rely on, plus "which files to ask for" per kind of mod | you need an exact member name |
 | [`Ormod_AI_Agent_Knowledge.md`](Ormod_AI_Agent_Knowledge.md) | The standing rules, the working procedure, prompt templates, habits, and the agent prompts embedded verbatim | you brief an AI assistant |
+| [`UPDATING.md`](UPDATING.md), [`CHANGELOG.md`](CHANGELOG.md), [`tools/`](tools/) | how to keep this repository current with every new mod and finding; what changed; the snippet and verify scripts | you finish a mod or find something out |
 | [`ai_prompts/`](ai_prompts/) | The master prompt (`AGENTS.md`), adapters for each AI tool, the review-role addendum, the mod standards, the directive check script | you set up a repository or an agent |
 
 ## The mods behind the notes
@@ -42,5 +43,5 @@ Notes, a tutorial and an AI-agent guide for making **BepInEx 6 / Unity** mods fo
 ## Provenance and credits
 
 - The findings come from the real build and test sessions of the Heechee mods (BepInEx 6 BE788, Unity 2022.3.21). The code quoted in the tutorial is copied from those mods by a script, not retyped.
-- Structure and spirit: *Windrose UE4SS Modding Notes* by dgomiller. When this knowledge base was written, the README and the first part of the notes file could be read; the Unreal SDK notes file could not be fetched (a rate limit), so only its description in that README was used.
+- Structure and spirit: *Windrose UE4SS Modding Notes* by dgomiller. The README and the notes file were read online (the notes file only in part, because of a fetch limit); the companion *Windrose Unreal SDK Notes* were then supplied as a file and read, which added the preface, the four milestones, the process rules and the worked examples.
 - **License:** not set. The author should choose one (the Windrose notes use CC0). Game names and assets belong to their owners; the notes contain no game assets, only class and member names and short quotations needed for explanation.
